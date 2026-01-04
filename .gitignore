@@ -1,0 +1,70 @@
+# Python cache & compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+
+# Virtual environments
+venv/
+env/
+.venv/
+.conda/
+
+# Jupyter Notebook artifacts
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+
+# OS / Editor specific
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+
+# Logs
+logs/
+*.log
+
+# Model artifacts 
+models/
+*.h5
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.joblib
+*.pkl
+
+# Dataset & raw data
+data/dataset/
+data/language/raw/
+data/language/processed/
+data/language/raw_pdfs/
+
+# Generated outputs
+outputs/
+results/
+predictions/
+
+# Grad-CAM / visualization outputs
+gradcam_outputs/
+*.png
+*.jpg
+
+
+# Environment & secrets
+.env
+.env.*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Large files (safety)
+*.zip
+*.tar
+*.tar.gz
