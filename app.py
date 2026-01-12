@@ -5,6 +5,10 @@ from PIL import Image
 import logging
 from typing import List, Tuple, Dict
 from datetime import datetime
+from utils.ocr import extract_text_from_image
+from language_model.language_risk import predict_language_risk
+from language_model.text_features import compute_raw_language_features
+
 
 from utils.predict import load_model
 from utils.preprocess import transform
@@ -86,7 +90,7 @@ def calculate_risk_level(risk_score: float) -> Tuple[str, str, str]:
     elif risk_score >= RISK_THRESHOLD_MEDIUM:
         return (
             "MODERATE RISK",
-            "⚡ Some dyslexia-related patterns detected. Consider consulting with an educational specialist for further evaluation.",
+            "Some dyslexia-related patterns detected. Consider consulting with an educational specialist for further evaluation.",
             "orange"
         )
     else:
@@ -179,11 +183,18 @@ def run_inference(
         st.error(f" Analysis failed: {str(e)}")
         return None
 
-def display_results(results: Dict, enable_gradcam: bool):
+def display_results(
+    results: Dict,
+    handwriting_risk: float,
+    language_risk: float,
+    final_risk: float,
+    enable_gradcam: bool
+):
+
     """
     Display screening results with professional formatting.
     """
-    risk_level, message, color = calculate_risk_level(results['risk_score'])
+    risk_level, message, color = calculate_risk_level(final_risk)
     
     # Main result card
     st.markdown("---")
@@ -210,6 +221,34 @@ def display_results(results: Dict, enable_gradcam: bool):
             label="Patches Analyzed",
             value=results['total_patches'],
             help="Total number of handwriting patches processed"
+        )
+    #Multimodal Risk Summary
+    st.markdown("### Multimodal Risk Summary")
+    col_h, col_l, col_f = st.columns(3)
+    with col_h:
+        st.metric(
+            "Handwriting Risk",
+            f"{handwriting_risk:.2%}",
+            help="Risk estimated from handwriting visual patterns"
+        )
+    with col_l:
+        if language_risk is not None:
+            st.metric(
+                "Language Risk",
+                f"{language_risk:.2%}",
+                help="Risk estimated from linguistic error patterns"
+            )
+        else:
+            st.metric(
+                "Language Risk",
+                "Not Available",
+                help="Insufficient text extracted for language analysis"
+            )
+    with col_f:
+        st.metric(
+            "Final Screening Risk",
+            f"{final_risk:.2%}",
+            help="Conservative fusion of handwriting and language risks"
         )
     
     # Risk interpretation
@@ -369,7 +408,7 @@ def main():
         
         # Grad-CAM toggle
         enable_gradcam = st.checkbox(
-            "🔬 Enable Grad-CAM Visualization",
+            "Enable Grad-CAM Visualization",
             value=False,
             help="Show AI explainability heatmaps (may slow down processing)"
         )
@@ -397,7 +436,7 @@ def main():
     
     # File upload section
     st.markdown("---")
-    st.header("📤 Upload Handwriting Sample")
+    st.header("Upload Handwriting Sample")
     
     uploaded_file = st.file_uploader(
         "Choose a handwriting image (full page recommended)",
@@ -440,7 +479,7 @@ def main():
                     # Validate patches
                     if len(patches) < MIN_PATCHES_REQUIRED:
                         st.warning(
-                            f"⚠️ Only {len(patches)} patches detected. "
+                            f"Only {len(patches)} patches detected. "
                             f"For reliable screening, at least {MIN_PATCHES_REQUIRED} patches are recommended. "
                             "Try uploading a larger image with more handwriting."
                         )
@@ -456,11 +495,37 @@ def main():
                         device, 
                         enable_gradcam=st.session_state.enable_gradcam
                     )
+                    ##Language Analysis
+                    with st.spinner("Analyzing written content (language patterns)..."):
+                        extracted_text = extract_text_from_image(image)
+                        if len(extracted_text.split()) < 20:
+                            st.warning(
+                                "Extracted text is very short"
+                                "Language based analysis may be less reliable"
+                            )
+                            language_risk=None
+                        else:
+                            raw_language_features = compute_raw_language_features(extracted_text)
+                            if raw_language_features is None:
+                                language_risk=None
+                            else:
+                                language_risk=predict_language_risk(raw_language_features,debug=False)
+                    #Late Fusion
+                    handwriting_risk = results["risk_score"]
+                    if language_risk is  None:
+                        final_risk = handwriting_risk 
+    
+                    else:
+                        language_gate = max(0.0, min((language_risk - 0.5) / 0.5, 1.0))
+                        final_risk=(0.65*handwriting_risk + 0.35*language_gate*language_risk)
                     
+                    if handwriting_risk<0.2:
+                        final_risk=min(final_risk,0.45)
+
+
                     if results:
                         # Display results
-                        display_results(results, st.session_state.enable_gradcam)
-                        
+                        display_results(results,handwriting_risk,language_risk,final_risk,st.session_state.enable_gradcam)
                         # Log analysis
                         logger.info(
                             f"Analysis completed: Risk={results['risk_score']:.2%}, "
