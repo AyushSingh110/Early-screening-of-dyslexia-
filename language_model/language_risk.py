@@ -2,11 +2,12 @@ import joblib
 import numpy as np
 from pathlib import Path
 
-from feature_engineering import extract_language_features
+from language_model.feature_engineering import extract_language_features
+
 
 # Load calibrated model once
-MODEL_PATH = Path("../models/language_risk_model.pkl")
-language_model = joblib.load(MODEL_PATH)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+MODEL_PATH = PROJECT_ROOT / "models" / "language_risk_model.pkl"
 
 print("Language risk model loaded successfully")
 

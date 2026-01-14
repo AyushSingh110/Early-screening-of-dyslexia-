@@ -6,8 +6,7 @@ import logging
 from typing import List, Tuple, Dict
 from datetime import datetime
 from utils.ocr import extract_text_from_image
-from language_model.language_risk import predict_language_risk
-from language_model.text_features import compute_raw_language_features
+from language_model.inference import predict_language_risk
 
 
 from utils.predict import load_model
@@ -204,7 +203,7 @@ def display_results(
     
     with col1:
         st.metric(
-            label="Risk Score",
+            label="Handwriting Patch Risk",
             value=f"{results['risk_score']:.2%}",
             help="Percentage of patches showing dyslexia-related patterns"
         )
@@ -505,19 +504,16 @@ def main():
                             )
                             language_risk=None
                         else:
-                            raw_language_features = compute_raw_language_features(extracted_text)
-                            if raw_language_features is None:
-                                language_risk=None
-                            else:
-                                language_risk=predict_language_risk(raw_language_features,debug=False)
+                            language_risk = predict_language_risk(extracted_text)
+
                     #Late Fusion
                     handwriting_risk = results["risk_score"]
                     if language_risk is  None:
                         final_risk = handwriting_risk 
     
                     else:
-                        language_gate = max(0.0, min((language_risk - 0.5) / 0.5, 1.0))
-                        final_risk=(0.65*handwriting_risk + 0.35*language_gate*language_risk)
+                 
+                        final_risk=(0.6*handwriting_risk + 0.25*language_risk+ 0.15*max(language_risk - handwriting_risk, 0))
                     
                     if handwriting_risk<0.2:
                         final_risk=min(final_risk,0.45)
