@@ -1,9 +1,39 @@
-torch
-torchvision
-numpy
-matplotlib
-opencv-python
-scikit-learn
-streamlit
-pandas
-seaborn
+# Core deep learning
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Machine learning
+scikit-learn>=1.3.0
+
+# NLP / language model
+transformers>=4.35.0
+datasets>=2.14.0
+
+# Image processing
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# OCR
+pytesseract>=0.3.10
+
+# Spell-checking & phonetics
+pyenchant>=3.2.2
+metaphone>=0.6
+
+# Data & utilities
+numpy>=1.24.0
+pandas>=2.0.0
+joblib>=1.3.0
+python-dotenv>=1.0.0
+kaggle>=1.6.0
+rarfile>=4.0
+
+# Visualisation
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Web application
+streamlit>=1.28.0
+
+# PDF ingestion (data preparation only)
+pdfplumber>=0.10.0

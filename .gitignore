@@ -59,6 +59,9 @@ gradcam_outputs/
 .env
 .env.*
 
+# Personal reference documentation (local only)
+DOCUMENTATION.md
+
 # Temporary files
 *.tmp
 *.temp

@@ -1,26 +1,17 @@
-"""
-Configuration File for Dyslexia Screening System
-Centralized configuration for all system parameters.
-"""
-
 import os
 from pathlib import Path
 
-# -----------------------------
 # System Information
-# -----------------------------
 VERSION = "1.0.0"
 SYSTEM_NAME = "Dyslexia Handwriting Screening System"
 
-# -----------------------------
 # Model Configuration
-# -----------------------------
-# Image input size (ResNet-50 expects 224x224)
+# Image input size (ResNet50 default is 224x224)
 IMAGE_SIZE = 224
 
 # Model architecture
 MODEL_ARCHITECTURE = "resnet50"
-NUM_CLASSES = 1  # Binary classification (dyslexic vs normal)
+NUM_CLASSES = 1  
 
 # Model paths
 BASE_DIR = Path(__file__).parent
@@ -30,12 +21,10 @@ DATA_DIR = BASE_DIR / "data"
 # Trained model checkpoint paths
 BASE_MODEL_PATH = "models/resnet50_dyslexia_base.pth"
 FINETUNED_MODEL_PATH = "models/resnet50_dyslexia_finetuned.pth"
-# Active model for inference (switch between baseline/finetuned)
-INFERENCE_MODEL_PATH = BASE_MODEL_PATH
+INFERENCE_MODEL_PATH = FINETUNED_MODEL_PATH
 
 
 # Training Configuration
-
 # Dataset paths
 TRAIN_DIR = str(DATA_DIR / "train")
 VAL_DIR = str(DATA_DIR / "val")
@@ -62,18 +51,16 @@ MODERATE_RISK_THRESHOLD = 0.3  # Risk score threshold for moderate risk
 
 # Patch extraction
 PATCH_SIZE = IMAGE_SIZE
-PATCH_STRIDE = IMAGE_SIZE  # No overlap by default
+PATCH_STRIDE = IMAGE_SIZE 
 PATCH_MIN_VARIANCE = 100.0  # Minimum variance to consider patch valid
 
 # Performance
 USE_MIXED_PRECISION = True
-NUM_WORKERS = 0  # DataLoader workers (set to 0 for Windows compatibility)
-
+NUM_WORKERS = 0 
 
 # Logging Configuration
-
 LOG_DIR = BASE_DIR / "logs"
-LOG_LEVEL = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_LEVEL = "INFO"  
 
 # Enable/disable logging to file
 LOG_TO_FILE = True

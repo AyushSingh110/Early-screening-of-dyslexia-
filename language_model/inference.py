@@ -1,45 +1,51 @@
-import math
-from language_model.text_features import compute_raw_language_features
+import logging
+from typing import Optional
+
+from language_model.text_features import extract_text_features
+
+logger = logging.getLogger(__name__)
+
+# Feature weights (must sum to 1.0)
+_WEIGHTS = {
+    "non_word_ratio":       0.40,
+    "phonetic_error_ratio": 0.25,
+    "rare_word_ratio":      0.10,
+    "perplexity":           0.25,
+}
 
 
-# Softening helpers
-def log_soften(x):
-    return math.log1p(max(x, 0.0))
+def predict_language_risk(text: str) -> Optional[float]:
+    """
+    Compute a dyslexia language-risk score from OCR text.
 
-def cap(x, max_val):
-    return min(x, max_val)
+    Parameters
+    ----------
+    text : str
+        Raw text extracted from the handwriting image.
 
-def soften_perplexity(p):
-    p = min(p, 500.0)
-    return math.log1p(p) / math.log1p(500.0)
-
-# Main API
-def predict_language_risk(text: str, debug=False):
-    raw = compute_raw_language_features(text)
-    if raw is None:
+    Returns
+    -------
+    float in [0, 1], or None if text is too short to be meaningful.
+    """
+    words = text.split()
+    if len(words) < 10:
+        logger.info("Text too short (%d words) for language risk scoring.", len(words))
         return None
 
-    # Softened features
-    spelling = log_soften(cap(raw["spelling_error_rate"], 0.5))
-    non_word = log_soften(cap(raw["non_word_ratio"], 0.4))
-    phonetic = log_soften(cap(raw["phonetic_error_ratio"], 0.4))
-    repetition = log_soften(cap(raw["repetition_score"], 0.4))
-    rare = log_soften(cap(raw["rare_word_ratio"], 0.4))
-    perplexity = soften_perplexity(raw["lm_perplexity"])
+    features = extract_text_features(text)
 
-    # Severity score
-    severity = (
-        0.35 * spelling +
-        0.15 * non_word +
-        0.10 * phonetic +
-        0.25 * repetition +
-        0.05 * rare +
-        0.10 * perplexity
+    risk = sum(
+        _WEIGHTS[key] * features[key]
+        for key in _WEIGHTS
     )
+    risk = max(0.0, min(1.0, risk))
 
-    severity = min(max(severity, 0.0), 1.0)
-
-    if debug:
-        print("Language severity:", severity)
-
-    return severity
+    logger.info(
+        "Language risk: %.3f  (nwr=%.2f  per=%.2f  rwr=%.2f  ppl=%.2f)",
+        risk,
+        features["non_word_ratio"],
+        features["phonetic_error_ratio"],
+        features["rare_word_ratio"],
+        features["perplexity"],
+    )
+    return risk
