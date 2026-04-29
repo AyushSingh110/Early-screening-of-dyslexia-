@@ -18,9 +18,9 @@ BASE_DIR = Path(__file__).parent
 MODELS_DIR = BASE_DIR / "models"
 DATA_DIR = BASE_DIR / "data"
 
-# Trained model checkpoint paths
-BASE_MODEL_PATH = "models/resnet50_dyslexia_base.pth"
-FINETUNED_MODEL_PATH = "models/resnet50_dyslexia_finetuned.pth"
+# Trained model checkpoint paths (absolute so they resolve from any working dir)
+BASE_MODEL_PATH = str(MODELS_DIR / "resnet50_dyslexia_base.pth")
+FINETUNED_MODEL_PATH = str(MODELS_DIR / "resnet50_dyslexia_finetuned.pth")
 INFERENCE_MODEL_PATH = FINETUNED_MODEL_PATH
 
 

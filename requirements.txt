@@ -35,5 +35,8 @@ seaborn>=0.12.0
 # Web application
 streamlit>=1.28.0
 
+# PDF report generation
+reportlab>=4.0.0
+
 # PDF ingestion (data preparation only)
 pdfplumber>=0.10.0
