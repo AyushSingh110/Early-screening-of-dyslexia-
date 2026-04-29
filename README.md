@@ -350,18 +350,18 @@ Runs automatically in two stages and saves both checkpoints to `models/`.
 python evaluate_models.py
 ```
 
-Results on **56,693 test images**:
+Results on **56,693 test patches** (label 0 = dyslexic, label 1 = normal — ImageFolder alphabetical):
 
 | Metric | Baseline | Fine-tuned | Winner |
 |---|---|---|---|
-| Accuracy | 70.6% | **75.9%** | Fine-tuned |
-| ROC-AUC | 78.3% | **84.9%** | Fine-tuned |
-| Dyslexic Precision | 87.8% | **82.7%** | Baseline |
-| Dyslexic Recall | 33.2% | **79.9%** | Fine-tuned ✓ |
-| Dyslexic F1 | 0.438 | **0.696** | Fine-tuned |
-| Normal Recall | **97.8%** | 71.3% | Baseline |
+| Accuracy | 68.9% | **77.0%** | Fine-tuned |
+| ROC-AUC | 75.7% | **86.0%** | Fine-tuned |
+| Dyslexic Precision | 80.3% | **96.6%** | Fine-tuned |
+| Dyslexic Recall | **69.5%** | 67.2% | Baseline |
+| Dyslexic F1 | 74.5% | **79.3%** | Fine-tuned ✓ |
+| Normal Recall | 67.6% | **95.5%** | Fine-tuned |
 
-> **Why recall matters**: In screening, missing a dyslexic case (false negative) is more harmful than a false alarm. The fine-tuned model's **79.9% dyslexic recall** makes it the recommended checkpoint for inference.
+> **Note**: The fine-tuned model has very high dyslexic precision (96.6%) — when it flags a patch as dyslexic it is almost always correct. Dyslexic recall (67.2%) means ~33% of dyslexic patches are missed at threshold 0.5; lowering the threshold trades precision for recall. For screening, a lower threshold (e.g. 0.35) is recommended to reduce missed cases.
 
 ---
 

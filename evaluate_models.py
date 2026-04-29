@@ -187,23 +187,34 @@ def run_evaluation_ensemble(
 # ---------------------------------------------------------------------------
 
 def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray) -> Dict:
-    acc     = accuracy_score(y_true, y_pred)
-    auc     = roc_auc_score(y_true, y_prob)
-    cm      = confusion_matrix(y_true, y_pred)
-    tn, fp, fn, tp = cm.ravel()
+    # y_true / y_pred use ImageFolder labels: dyslexic=0, normal=1
+    # y_prob = P(normal) from model sigmoid output
+    # AUC: pass P(normal) with pos_label=1 (normal) — symmetric so value is correct
+    acc = accuracy_score(y_true, y_pred)
+    auc = roc_auc_score(y_true, y_prob)
 
-    prec_d  = tp / max(tp + fp, 1)
-    rec_d   = tp / max(tp + fn, 1)
-    f1_d    = 2 * prec_d * rec_d / max(prec_d + rec_d, 1e-9)
-    prec_n  = tn / max(tn + fn, 1)
-    rec_n   = tn / max(tn + fp, 1)
-    f1_n    = 2 * prec_n * rec_n / max(prec_n + rec_n, 1e-9)
+    # confusion_matrix rows/cols ordered by label: 0=dyslexic, 1=normal
+    # [[pred0∩true0, pred1∩true0], [pred0∩true1, pred1∩true1]]
+    # = [[correctly_dyslexic, missed_dyslexic], [false_alarm, correctly_normal]]
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
+    correctly_dys, missed_dys, false_alarm, correctly_nor = cm.ravel()
+
+    # Dyslexic (label=0) as the target positive class
+    prec_d = correctly_dys / max(correctly_dys + false_alarm, 1)
+    rec_d  = correctly_dys / max(correctly_dys + missed_dys,  1)
+    f1_d   = 2 * prec_d * rec_d / max(prec_d + rec_d, 1e-9)
+
+    # Normal (label=1)
+    prec_n = correctly_nor / max(correctly_nor + missed_dys, 1)
+    rec_n  = correctly_nor / max(correctly_nor + false_alarm, 1)
+    f1_n   = 2 * prec_n * rec_n / max(prec_n + rec_n, 1e-9)
 
     return dict(
         accuracy=acc, roc_auc=auc,
         precision_dyslexic=prec_d, recall_dyslexic=rec_d, f1_dyslexic=f1_d,
         precision_normal=prec_n,   recall_normal=rec_n,   f1_normal=f1_n,
-        tp=int(tp), tn=int(tn), fp=int(fp), fn=int(fn),
+        correctly_dys=int(correctly_dys), missed_dys=int(missed_dys),
+        false_alarm=int(false_alarm),     correctly_nor=int(correctly_nor),
     )
 
 
@@ -216,18 +227,18 @@ def print_report(name: str, m: Dict) -> None:
     print(f"\n  {name}")
     print(f"  Accuracy  : {_bar(m['accuracy'])}")
     print(f"  ROC-AUC   : {_bar(m['roc_auc'])}")
-    print(f"\n  Dyslexic class:")
+    print(f"\n  Dyslexic class (label=0, target positive):")
     print(f"    Precision : {m['precision_dyslexic']:.4f}")
-    print(f"    Recall    : {m['recall_dyslexic']:.4f}   ← higher = fewer missed cases")
+    print(f"    Recall    : {m['recall_dyslexic']:.4f}   ← higher = fewer missed dyslexic cases")
     print(f"    F1        : {m['f1_dyslexic']:.4f}")
-    print(f"\n  Normal class:")
+    print(f"\n  Normal class (label=1):")
     print(f"    Precision : {m['precision_normal']:.4f}")
     print(f"    Recall    : {m['recall_normal']:.4f}")
     print(f"    F1        : {m['f1_normal']:.4f}")
-    print(f"\n  Confusion matrix:")
-    print(f"                    Pred Normal   Pred Dyslexic")
-    print(f"  Actual Normal       {m['tn']:>7,}       {m['fp']:>7,}")
-    print(f"  Actual Dyslexic     {m['fn']:>7,}       {m['tp']:>7,}")
+    print(f"\n  Confusion matrix (rows=true, cols=predicted):")
+    print(f"                      Pred Dyslexic  Pred Normal")
+    print(f"  Actual Dyslexic      {m['correctly_dys']:>7,}       {m['missed_dys']:>7,}")
+    print(f"  Actual Normal        {m['false_alarm']:>7,}       {m['correctly_nor']:>7,}")
 
 
 def print_comparison(results: Dict[str, Dict]) -> None:
@@ -268,11 +279,13 @@ def save_predictions_csv(
     name: str, y_true: np.ndarray, y_pred: np.ndarray, y_prob: np.ndarray
 ) -> None:
     out = MODELS_DIR / f"predictions_{name.replace(' ', '_').lower()}.csv"
+    # true_label / predicted_label: 0=dyslexic, 1=normal
+    # dyslexia_probability = 1 - model_output = P(dyslexic)  (high → more likely dyslexic)
     with open(out, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["true_label", "predicted_label", "dyslexia_probability"])
         for t, p, pr in zip(y_true, y_pred, y_prob):
-            writer.writerow([int(t), int(p), f"{pr:.6f}"])
+            writer.writerow([int(t), int(p), f"{1.0 - pr:.6f}"])
     logger.info("Predictions saved → %s", out)
 
 

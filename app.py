@@ -208,17 +208,19 @@ def run_vision(patches, model, device, enable_gradcam, use_tta) -> Optional[Dict
                 with torch.no_grad():
                     prob = model(tensor).item()
 
-            predictions.append(prob)
-            if prob > 0.5:
+            # Model outputs P(normal). Dyslexic = P(normal) < 0.5
+            dyslexia_prob = 1.0 - prob
+            predictions.append(dyslexia_prob)
+            if dyslexia_prob > 0.5:
                 dyslexic_count += 1
 
-            if enable_gradcam and (prob > 0.6 or prob < 0.4):
+            if enable_gradcam and (dyslexia_prob > 0.6 or dyslexia_prob < 0.4):
                 try:
                     t = transform(pil).unsqueeze(0).to(device)
                     cam, overlay = generate_gradcam_visualization(model, patch, t, device)
                     if overlay is not None:
-                        gradcam_vis.append({"patch_idx": idx, "confidence": prob,
-                                            "prediction": "Dyslexic" if prob > 0.5 else "Normal",
+                        gradcam_vis.append({"patch_idx": idx, "confidence": dyslexia_prob,
+                                            "prediction": "Dyslexic" if dyslexia_prob > 0.5 else "Normal",
                                             "original": patch, "overlay": overlay})
                 except Exception as exc:
                     logger.warning("Grad-CAM patch %d: %s", idx, exc)
@@ -533,7 +535,8 @@ def analyse_batch(zip_file, model, device, use_tta) -> None:
                     with torch.no_grad():
                         preds.append(model(t).item())
 
-            hw    = sum(1 for p in preds if p > 0.5) / len(preds)
+            # Model outputs P(normal); dyslexic = P(normal) < 0.5
+            hw    = sum(1 for p in preds if p < 0.5) / len(preds)
             label, _, _ = classify_risk(hw)
             rows.append({
                 "File":       name,

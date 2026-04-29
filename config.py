@@ -18,6 +18,11 @@ BASE_DIR = Path(__file__).parent
 MODELS_DIR = BASE_DIR / "models"
 DATA_DIR = BASE_DIR / "data"
 
+# Class indices (ImageFolder sorts alphabetically: dyslexic < normal)
+DYSLEXIC_CLASS_IDX = 0   # label=0 in all datasets and CSVs
+NORMAL_CLASS_IDX   = 1   # label=1
+# Model output is P(normal). P(dyslexic) = 1 - model_output
+
 # Trained model checkpoint paths (absolute so they resolve from any working dir)
 BASE_MODEL_PATH = str(MODELS_DIR / "resnet50_dyslexia_base.pth")
 FINETUNED_MODEL_PATH = str(MODELS_DIR / "resnet50_dyslexia_finetuned.pth")
