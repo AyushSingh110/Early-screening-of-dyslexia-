@@ -28,8 +28,7 @@ Thumbs.db
 logs/
 *.log
 
-# Model artifacts 
-models/
+# Model artifacts
 *.h5
 *.pt
 *.pth
@@ -37,8 +36,15 @@ models/
 *.onnx
 *.joblib
 *.pkl
+models/*
+!models/.gitkeep
+!models/*.pth
 
 # Dataset & raw data
+data/train/
+data/val/
+data/test/
+data/Gambo/
 data/dataset/
 data/language/raw/
 data/language/processed/

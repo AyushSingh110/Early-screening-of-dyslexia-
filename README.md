@@ -1,3 +1,9 @@
+---
+title: Early Dyslexia Screening
+sdk: docker
+app_port: 8501
+---
+
 # Early Screening of Dyslexia
 
 An AI-powered multimodal system for early-stage dyslexia screening, combining deep learning-based handwriting analysis with linguistic feature engineering. Built for educators, parents, and clinical support professionals.
@@ -134,26 +140,19 @@ Both modalities are fused into a unified risk score through a weighted multimoda
 ```
 Early-screening-of-dyslexia-/
 │
-├── app.py                          # Streamlit web application (main entry point)
-├── config.py                       # Centralized configuration (hyperparameters, paths, thresholds)
+├── frontend/
+│   └── app.py                      # Streamlit web application (main entry point)
+├── backend/
+│   ├── config.py                   # Centralized configuration (hyperparameters, paths, thresholds)
+│   ├── train_vision.py             # Two-stage vision model training script
+│   ├── evaluate_models.py          # Side-by-side baseline vs fine-tuned evaluation
+│   ├── utils/                      # Vision/OCR/report/history utilities
+│   └── language_model/             # Linguistic analysis module
 ├── requirements.txt                # Python dependencies
-├── train_vision.py                 # Two-stage vision model training script
-├── evaluate_models.py              # Side-by-side baseline vs fine-tuned evaluation
-├── download_dataset.py             # Kaggle dataset download and organisation
+├── requirements-deploy.txt         # Lean runtime dependencies for Docker deployment
+├── Dockerfile                      # Hugging Face Spaces Docker deployment
+├── DEPLOYMENT.md                   # Step-by-step deployment guide
 ├── student_writing.csv             # Linguistic dataset (token-level error annotations)
-│
-├── utils/                          # Vision model utilities
-│   ├── __init__.py
-│   ├── predict.py                  # ResNet-50 model loading and inference
-│   ├── preprocess.py               # Image preprocessing and augmentation pipelines
-│   ├── patchify.py                 # Sliding window patch extraction with variance filter
-│   ├── ocr.py                      # Tesseract OCR text extraction
-│   └── gradcam.py                  # Grad-CAM explainability visualizations
-│
-├── language_model/                 # Linguistic analysis module
-│   ├── __init__.py
-│   ├── text_features.py            # Spell-check, phonetic, perplexity feature extraction
-│   └── inference.py                # Weighted rule-based language risk scoring
 │
 ├── models/                         # Saved model weights (not included in repo)
 │   ├── resnet50_dyslexia_base.pth       # Stage 1 baseline checkpoint
@@ -204,7 +203,7 @@ pip install -r requirements.txt
 ### Running the Web Application
 
 ```bash
-streamlit run app.py
+streamlit run frontend/app.py
 ```
 
 Opens at `http://localhost:8501` in your browser.
@@ -219,24 +218,14 @@ Opens at `http://localhost:8501` in your browser.
    - Per-patch predictions and confidence distribution
    - Grad-CAM heatmaps highlighting model attention regions
 
-### Dataset Download
-
-```bash
-# Add your Kaggle credentials to .env first:
-# KAGGLE_USERNAME=your_username
-# KAGGLE_API_TOKEN=your_token
-
-python download_dataset.py
-```
-
 ### Training
 
 ```bash
 # Train both baseline and fine-tuned checkpoints:
-python train_vision.py
+python -m backend.train_vision
 
 # Evaluate both models side-by-side on the test set:
-python evaluate_models.py
+python -m backend.evaluate_models
 ```
 
 ---
@@ -333,7 +322,7 @@ final_risk = 0.60 × handwriting_risk
 ## Training
 
 ```bash
-python train_vision.py
+python -m backend.train_vision
 ```
 
 Runs automatically in two stages and saves both checkpoints to `models/`.
@@ -347,7 +336,7 @@ Runs automatically in two stages and saves both checkpoints to `models/`.
 ## Evaluation
 
 ```bash
-python evaluate_models.py
+python -m backend.evaluate_models
 ```
 
 Results on **56,693 test patches** (label 0 = dyslexic, label 1 = normal — ImageFolder alphabetical):
@@ -386,7 +375,7 @@ Enable from the sidebar in the Streamlit app.
 
 ## Configuration
 
-All hyperparameters are centralized in [config.py](config.py):
+All hyperparameters are centralized in [backend/config.py](backend/config.py):
 
 ```python
 IMAGE_SIZE          = 224       # Input patch size
@@ -409,16 +398,25 @@ NUM_WORKERS         = 0         # Windows compatibility
 
 ## Deployment
 
-### Streamlit Community Cloud (Recommended — Free)
+### Recommended: Hugging Face Spaces Docker
+
+1. Create a new Space at [huggingface.co/spaces](https://huggingface.co/spaces) and choose **Docker**.
+2. Push this repository to the Space.
+3. Upload `models/resnet50_dyslexia_finetuned.pth` with Git LFS.
+4. The app runs from `frontend/app.py` on port `8501`.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for exact commands.
+
+### Alternative: Streamlit Community Cloud
 
 1. Push this repository to GitHub (add model files via Git LFS or host on HuggingFace Hub)
 2. Visit [share.streamlit.io](https://share.streamlit.io)
-3. Connect your GitHub repo → select `app.py` as the entry point
+3. Connect your GitHub repo and select `frontend/app.py` as the entry point
 4. Add any secrets (e.g. Kaggle credentials) in the Secrets panel
 
-### HuggingFace Spaces
+### Older Hugging Face Spaces Notes
 
-1. Create a new Space at [huggingface.co/spaces](https://huggingface.co/spaces) (choose Streamlit SDK)
+1. Create a new Space at [huggingface.co/spaces](https://huggingface.co/spaces)
 2. Push the repo — HuggingFace supports large model files natively
 3. The app runs at `https://huggingface.co/spaces/<username>/<space-name>`
 
