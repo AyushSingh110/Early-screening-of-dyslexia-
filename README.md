@@ -1,9 +1,3 @@
----
-title: Early Dyslexia Screening
-sdk: docker
-app_port: 8501
----
-
 # Early Screening of Dyslexia
 
 An AI-powered multimodal system for early-stage dyslexia screening, combining deep learning-based handwriting analysis with linguistic feature engineering. Built for educators, parents, and clinical support professionals.
