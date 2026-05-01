@@ -435,11 +435,6 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for exact commands.
 
 ## License
 
-This project is intended for educational and research purposes.
+Apache 2.0
 
 ---
-
-## Author
-
-**Ayush Singh**  
-AI/ML project for early dyslexia screening using multimodal deep learning.
