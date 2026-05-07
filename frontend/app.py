@@ -117,6 +117,209 @@ def _inject_css() -> None:
     st.markdown("""
     <style>
     :root {
+        --ink: #eef6ff;
+        --muted: #a9b7c9;
+        --line: #263548;
+        --surface: #111c2d;
+        --surface-soft: #16243a;
+        --blue: #60a5fa;
+        --teal: #2dd4bf;
+        --green: #34d399;
+        --amber: #fbbf24;
+        --red: #f87171;
+    }
+
+    .stApp {
+        background:
+            radial-gradient(circle at top left, rgba(45,212,191,.18), transparent 340px),
+            linear-gradient(180deg, #07111f 0%, #0b1423 46%, #101827 100%);
+        color: var(--ink);
+    }
+    .block-container {
+        max-width: 1180px;
+        padding-top: 1.25rem;
+        padding-bottom: 2.4rem;
+    }
+    h1, h2, h3, h4, h5, h6, p, li, label, span {
+        color: inherit;
+        letter-spacing: 0;
+    }
+
+    .main-header {
+        background:
+            linear-gradient(135deg, rgba(17,28,45,.98), rgba(15,40,60,.94));
+        border: 1px solid rgba(96,165,250,.18);
+        border-left: 6px solid var(--teal);
+        border-radius: 10px;
+        padding: 1.55rem 1.8rem;
+        margin-bottom: 1.15rem;
+        box-shadow: 0 18px 44px rgba(0,0,0,.28);
+    }
+    .main-header h1 {
+        color: #f8fbff;
+        font-size: 1.95rem;
+        line-height: 1.15;
+        margin: 0 0 .45rem 0;
+        font-weight: 800;
+    }
+    .main-header p {
+        color: var(--muted);
+        font-size: .98rem;
+        margin: 0;
+        max-width: 820px;
+    }
+
+    div[data-testid="stTabs"] button {
+        border-radius: 8px 8px 0 0;
+        color: var(--muted);
+        font-weight: 650;
+    }
+    div[data-testid="stTabs"] button[aria-selected="true"] {
+        color: var(--teal);
+        background: rgba(45,212,191,.11);
+    }
+
+    div[data-testid="stFileUploader"] {
+        background: var(--surface);
+        border: 1px dashed #3b5876;
+        border-radius: 10px;
+        padding: .9rem;
+        box-shadow: 0 10px 28px rgba(0,0,0,.22);
+    }
+    div[data-testid="stFileUploader"] section {
+        background: #0d1a2b;
+        border-color: #2a4058;
+    }
+
+    .metric-card {
+        background: linear-gradient(180deg, #142238, #101b2d);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        border: 1px solid #263548;
+        border-top: 4px solid var(--teal);
+        box-shadow: 0 12px 30px rgba(0,0,0,.22);
+        min-height: 104px;
+    }
+    .metric-card .label {
+        font-size: .72rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: .38rem;
+        font-weight: 700;
+    }
+    .metric-card .value {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #f8fbff;
+    }
+
+    .risk-banner {
+        border-radius: 10px;
+        padding: 1.35rem 1.65rem;
+        margin: 1rem 0;
+        text-align: left;
+        box-shadow: 0 14px 34px rgba(0,0,0,.24);
+    }
+    .risk-high {
+        background:#2a1218;
+        border:1px solid rgba(248,113,113,.32);
+        border-left:6px solid var(--red);
+    }
+    .risk-moderate {
+        background:#2a2110;
+        border:1px solid rgba(251,191,36,.30);
+        border-left:6px solid var(--amber);
+    }
+    .risk-low {
+        background:#10251d;
+        border:1px solid rgba(52,211,153,.30);
+        border-left:6px solid var(--green);
+    }
+    .risk-banner .risk-label { font-size:1.42rem; font-weight:850; }
+    .risk-high .risk-label { color:var(--red); }
+    .risk-moderate .risk-label { color:var(--amber); }
+    .risk-low .risk-label { color:var(--green); }
+    .risk-banner .risk-msg { color:#d7e1ee; }
+
+    .score-bar-wrap {
+        background:#1e2b3d;
+        border-radius:999px;
+        height:12px;
+        margin:.55rem 0 .2rem;
+        overflow:hidden;
+        border: 1px solid rgba(148,163,184,.22);
+    }
+    .score-bar-fill {
+        height:100%;
+        border-radius:999px;
+        transition: width .25s ease;
+    }
+
+    .section-title {
+        font-size: 1.02rem;
+        font-weight: 800;
+        color: #f8fbff;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: .45rem;
+        margin: 1.35rem 0 .9rem;
+    }
+
+    section[data-testid="stSidebar"] {
+        background:
+            linear-gradient(180deg, #0a1321 0%, #101c2f 100%) !important;
+        border-right: 1px solid #253348;
+    }
+    section[data-testid="stSidebar"] * { color: #d8e3f1 !important; }
+    section[data-testid="stSidebar"] .stMarkdown a { color: var(--blue) !important; }
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        font-size: .92rem;
+    }
+
+    .stButton > button, .stDownloadButton > button {
+        border-radius: 8px;
+        font-weight: 750;
+        border: 1px solid rgba(96,165,250,.20);
+        box-shadow: 0 10px 24px rgba(0,0,0,.24);
+    }
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #2563eb, var(--teal));
+        border: 0;
+        color: white;
+    }
+    div[data-testid="stExpander"] {
+        background: var(--surface);
+        border: 1px solid #263548;
+        border-radius: 8px;
+        box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    }
+    div[data-testid="stDataFrame"] {
+        border: 1px solid #263548;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .disclaimer {
+        background:#0f2238;
+        border:1px solid #25496d;
+        border-left: 5px solid var(--blue);
+        border-radius:8px;
+        padding:1rem 1.15rem;
+        font-size:.85rem;
+        color:#dbeafe;
+        margin-top:1.5rem;
+    }
+
+    @media (max-width: 760px) {
+        .block-container { padding-left: 1rem; padding-right: 1rem; }
+        .main-header { padding: 1.2rem; }
+        .main-header h1 { font-size: 1.55rem; }
+        .metric-card { min-height: auto; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    :root {
         --ink: #172033;
         --muted: #5b677a;
         --line: #d9e1ea;
