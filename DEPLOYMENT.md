@@ -50,6 +50,22 @@ If you want screening history to persist across Space restarts, add persistent s
 DYSLEXIA_HISTORY_DB=/data/screening_history.db
 ```
 
+## One-command Upload
+
+Log in with a Hugging Face token that has **write** permission:
+
+```bash
+huggingface-cli login
+```
+
+Then deploy or update the Space:
+
+```bash
+python scripts/deploy_to_hf_space.py --repo-id AImRs/dyslexia-early-screening-system
+```
+
+The script creates a Docker Space if needed and uploads the Streamlit frontend, backend package, deployment config, and model checkpoints. It skips local-only files such as datasets, logs, notebooks, and secrets.
+
 ## Notes
 
 - `frontend/app.py` is the Streamlit UI.

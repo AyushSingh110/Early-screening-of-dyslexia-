@@ -1,3 +1,14 @@
+---
+title: Dyslexia Early Screening System
+emoji: 🧠
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 8501
+pinned: false
+license: mit
+---
+
 # Early Screening of Dyslexia
 
 An AI-powered multimodal system for early-stage dyslexia screening, combining deep learning-based handwriting analysis with linguistic feature engineering. Built for educators, parents, and clinical support professionals.

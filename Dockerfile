@@ -4,7 +4,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     STREAMLIT_SERVER_HEADLESS=true \
-    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false \
+    HF_HOME=/home/user/.cache/huggingface \
+    TRANSFORMERS_CACHE=/home/user/.cache/huggingface/transformers
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -32,4 +34,4 @@ COPY --chown=user . .
 
 EXPOSE 8501
 
-CMD ["streamlit", "run", "frontend/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "frontend/app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]

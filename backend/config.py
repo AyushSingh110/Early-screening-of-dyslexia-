@@ -65,13 +65,16 @@ USE_MIXED_PRECISION = True
 NUM_WORKERS = 0 
 
 # Logging Configuration
-LOG_DIR = Path(os.getenv("DYSLEXIA_LOG_DIR", BASE_DIR / "logs"))
+_SPACE_DATA_DIR = Path("/data")
+_RUNTIME_STATE_DIR = _SPACE_DATA_DIR if _SPACE_DATA_DIR.exists() else BASE_DIR
+
+LOG_DIR = Path(os.getenv("DYSLEXIA_LOG_DIR", _RUNTIME_STATE_DIR / "logs"))
 LOG_LEVEL = "INFO"  
 
 # Enable/disable logging to file
 LOG_TO_FILE = True
 LOG_FILE = LOG_DIR / "dyslexia_system.log"
-HISTORY_DB_PATH = Path(os.getenv("DYSLEXIA_HISTORY_DB", BASE_DIR / "screening_history.db"))
+HISTORY_DB_PATH = Path(os.getenv("DYSLEXIA_HISTORY_DB", _RUNTIME_STATE_DIR / "screening_history.db"))
 
 
 # UI Configuration
