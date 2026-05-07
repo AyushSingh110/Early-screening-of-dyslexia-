@@ -114,6 +114,204 @@ def _inject_css() -> None:
         padding:1rem 1.2rem; font-size:.85rem; color:#1e40af; margin-top:1.5rem; }
     </style>
     """, unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    :root {
+        --ink: #172033;
+        --muted: #5b677a;
+        --line: #d9e1ea;
+        --surface: #ffffff;
+        --blue: #2563eb;
+        --teal: #0f9f8f;
+        --green: #16a34a;
+        --amber: #d97706;
+        --red: #dc2626;
+    }
+
+    .stApp {
+        background:
+            linear-gradient(180deg, #eef6ff 0%, #f8fbfd 250px, #f6f8fb 100%);
+        color: var(--ink);
+    }
+    .block-container {
+        max-width: 1180px;
+        padding-top: 1.25rem;
+        padding-bottom: 2.4rem;
+    }
+    h1, h2, h3, h4, h5, h6, p, li, label, span {
+        letter-spacing: 0;
+    }
+
+    .main-header {
+        background:
+            linear-gradient(135deg, rgba(255,255,255,.98), rgba(244,250,255,.98));
+        border: 1px solid rgba(37, 99, 235, .14);
+        border-left: 6px solid var(--blue);
+        border-radius: 10px;
+        padding: 1.55rem 1.8rem;
+        margin-bottom: 1.15rem;
+        box-shadow: 0 14px 36px rgba(29, 78, 216, .10);
+    }
+    .main-header h1 {
+        color: var(--ink);
+        font-size: 1.95rem;
+        line-height: 1.15;
+        margin: 0 0 .45rem 0;
+        font-weight: 800;
+    }
+    .main-header p {
+        color: var(--muted);
+        font-size: .98rem;
+        margin: 0;
+        max-width: 820px;
+    }
+
+    div[data-testid="stTabs"] button {
+        border-radius: 8px 8px 0 0;
+        color: var(--muted);
+        font-weight: 650;
+    }
+    div[data-testid="stTabs"] button[aria-selected="true"] {
+        color: var(--blue);
+        background: rgba(37,99,235,.07);
+    }
+
+    div[data-testid="stFileUploader"] {
+        background: var(--surface);
+        border: 1px dashed #a8bfdc;
+        border-radius: 10px;
+        padding: .9rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
+    }
+    div[data-testid="stFileUploader"] section {
+        background: #f8fbff;
+        border-color: #d7e5f5;
+    }
+
+    .metric-card {
+        background: var(--surface);
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        border: 1px solid #e3eaf2;
+        border-top: 4px solid var(--blue);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .055);
+        min-height: 104px;
+    }
+    .metric-card .label {
+        font-size: .72rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: .38rem;
+        font-weight: 700;
+    }
+    .metric-card .value {
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: var(--ink);
+    }
+
+    .risk-banner {
+        border-radius: 10px;
+        padding: 1.35rem 1.65rem;
+        margin: 1rem 0;
+        text-align: left;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, .06);
+    }
+    .risk-high {
+        background:#fff7f7;
+        border:1px solid #fecaca;
+        border-left:6px solid var(--red);
+    }
+    .risk-moderate {
+        background:#fffbeb;
+        border:1px solid #fde68a;
+        border-left:6px solid var(--amber);
+    }
+    .risk-low {
+        background:#f0fdf6;
+        border:1px solid #bbf7d0;
+        border-left:6px solid var(--green);
+    }
+    .risk-banner .risk-label { font-size:1.42rem; font-weight:850; }
+    .risk-high .risk-label { color:var(--red); }
+    .risk-moderate .risk-label { color:var(--amber); }
+    .risk-low .risk-label { color:var(--green); }
+
+    .score-bar-wrap {
+        background:#e5edf5;
+        border-radius:999px;
+        height:12px;
+        margin:.55rem 0 .2rem;
+        overflow:hidden;
+        border: 1px solid rgba(148,163,184,.35);
+    }
+    .score-bar-fill {
+        height:100%;
+        border-radius:999px;
+        transition: width .25s ease;
+    }
+
+    .section-title {
+        font-size: 1.02rem;
+        font-weight: 800;
+        color: var(--ink);
+        border-bottom: 1px solid var(--line);
+        padding-bottom: .45rem;
+        margin: 1.35rem 0 .9rem;
+    }
+
+    section[data-testid="stSidebar"] {
+        background:
+            linear-gradient(180deg, #f8fbff 0%, #eef4f8 100%) !important;
+        border-right: 1px solid #dbe6ef;
+    }
+    section[data-testid="stSidebar"] * { color: #1e293b !important; }
+    section[data-testid="stSidebar"] .stMarkdown a { color: var(--blue) !important; }
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        font-size: .92rem;
+    }
+
+    .stButton > button, .stDownloadButton > button {
+        border-radius: 8px;
+        font-weight: 750;
+        border: 1px solid rgba(37, 99, 235, .2);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, .12);
+    }
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, var(--blue), var(--teal));
+        border: 0;
+    }
+    div[data-testid="stExpander"] {
+        background: var(--surface);
+        border: 1px solid #e3eaf2;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, .035);
+    }
+    div[data-testid="stDataFrame"] {
+        border: 1px solid #e3eaf2;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .disclaimer {
+        background:#eff6ff;
+        border:1px solid #bfdbfe;
+        border-left: 5px solid var(--blue);
+        border-radius:8px;
+        padding:1rem 1.15rem;
+        font-size:.85rem;
+        color:#1e40af;
+        margin-top:1.5rem;
+    }
+
+    @media (max-width: 760px) {
+        .block-container { padding-left: 1rem; padding-right: 1rem; }
+        .main-header { padding: 1.2rem; }
+        .main-header h1 { font-size: 1.55rem; }
+        .metric-card { min-height: auto; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
