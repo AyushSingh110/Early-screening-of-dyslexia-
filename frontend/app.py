@@ -57,460 +57,248 @@ MIN_OCR_WORDS = 20
 def _inject_css() -> None:
     st.markdown("""
     <style>
-    /* ── Page background ── */
-    .stApp { background-color: #f4f6f9; }
+    /* ── Clinical Design System ── */
+    :root {
+        --bg:        #f0f4f8;
+        --surface:   #ffffff;
+        --border:    #dce4ed;
+        --ink:       #0d1b2a;
+        --ink2:      #3d5166;
+        --ink3:      #7a92a8;
+        --primary:   #1a56db;
+        --primary-h: #1545b8;
+        --teal:      #0891b2;
+        --green:     #059669;
+        --amber:     #b45309;
+        --red:       #b91c1c;
+        --green-bg:  #ecfdf5;
+        --amber-bg:  #fffbeb;
+        --red-bg:    #fef2f2;
+        --green-bd:  #6ee7b7;
+        --amber-bd:  #fcd34d;
+        --red-bd:    #fca5a5;
+    }
+
+    /* Page */
+    .stApp { background-color: var(--bg); color: var(--ink); }
+    .block-container { max-width: 1160px; padding-top: 1.2rem; padding-bottom: 3rem; }
+    h1,h2,h3,h4,h5,h6 { color: var(--ink); letter-spacing: -.01em; }
 
     /* ── Header ── */
     .main-header {
-        background: #ffffff;
-        border-top: 5px solid #2563eb;
-        border-radius: 0 0 12px 12px;
-        padding: 1.8rem 2.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 10px rgba(37,99,235,.10);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-top: 4px solid var(--primary);
+        border-radius: 10px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
     }
-    .main-header h1 { color:#1e3a5f; font-size:1.85rem; margin:0 0 .4rem 0; }
-    .main-header p  { color:#4b6a8a; font-size:.95rem; margin:0; }
+    .main-header .hdr-icon {
+        font-size: 2.6rem;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+    .main-header .hdr-text h1 {
+        color: var(--ink);
+        font-size: 1.7rem;
+        font-weight: 800;
+        margin: 0 0 .25rem 0;
+        letter-spacing: -.02em;
+    }
+    .main-header .hdr-text p { color: var(--ink2); font-size: .93rem; margin: 0; }
+    .main-header .hdr-badge {
+        margin-left: auto;
+        flex-shrink: 0;
+        background: #eff6ff;
+        color: var(--primary);
+        border: 1px solid #bfdbfe;
+        border-radius: 999px;
+        padding: .3rem .9rem;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
 
     /* ── Metric cards ── */
     .metric-card {
-        background: #ffffff; border-radius: 10px;
-        padding: 1.1rem 1.4rem;
-        box-shadow: 0 1px 6px rgba(0,0,0,.07);
-        border-left: 4px solid #2563eb;
-        margin-bottom: .8rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--primary);
+        border-radius: 8px;
+        padding: 1rem 1.1rem;
+        min-height: 96px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.05);
     }
-    .metric-card .label { font-size:.75rem; color:#64748b;
-        text-transform:uppercase; letter-spacing:.06em; margin-bottom:.3rem; }
-    .metric-card .value { font-size:1.6rem; font-weight:700; color:#1e3a5f; }
+    .metric-card .label {
+        font-size: .7rem;
+        color: var(--ink3);
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        font-weight: 700;
+        margin-bottom: .4rem;
+    }
+    .metric-card .value { font-size: 1.5rem; font-weight: 800; color: var(--ink); }
 
     /* ── Risk banners ── */
-    .risk-banner { border-radius:10px; padding:1.4rem 2rem; margin:1rem 0; text-align:center; }
-    .risk-high     { background:#fff5f5; border:2px solid #f87171; }
-    .risk-moderate { background:#fffbf0; border:2px solid #fbbf24; }
-    .risk-low      { background:#f0fdf6; border:2px solid #34d399; }
-    .risk-banner .risk-label { font-size:1.5rem; font-weight:800; }
-    .risk-high     .risk-label { color:#b91c1c; }
-    .risk-moderate .risk-label { color:#b45309; }
-    .risk-low      .risk-label { color:#059669; }
-    .risk-banner .risk-msg { font-size:.93rem; margin-top:.4rem; color:#374151; }
+    .risk-banner {
+        border-radius: 8px;
+        padding: 1.2rem 1.5rem;
+        margin: 1rem 0;
+        border-left: 5px solid;
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+    }
+    .risk-high     { background: var(--red-bg);   border-color: var(--red);   border: 1px solid var(--red-bd);   border-left: 5px solid var(--red); }
+    .risk-moderate { background: var(--amber-bg); border-color: var(--amber); border: 1px solid var(--amber-bd); border-left: 5px solid var(--amber); }
+    .risk-low      { background: var(--green-bg); border-color: var(--green); border: 1px solid var(--green-bd); border-left: 5px solid var(--green); }
+    .risk-banner .risk-label { font-size: 1.25rem; font-weight: 800; }
+    .risk-high     .risk-label { color: var(--red); }
+    .risk-moderate .risk-label { color: var(--amber); }
+    .risk-low      .risk-label { color: var(--green); }
+    .risk-banner .risk-msg { font-size: .88rem; color: var(--ink2); line-height: 1.5; }
 
-    /* ── Progress bar ── */
-    .score-bar-wrap { background:#e2e8f0; border-radius:999px; height:13px;
-        margin:.5rem 0 .2rem; overflow:hidden; }
-    .score-bar-fill { height:100%; border-radius:999px; }
+    /* ── Score bar ── */
+    .score-bar-wrap {
+        background: #e8edf3;
+        border-radius: 999px;
+        height: 10px;
+        margin: .5rem 0 .15rem;
+        overflow: hidden;
+    }
+    .score-bar-fill { height: 100%; border-radius: 999px; }
 
     /* ── Section titles ── */
-    .section-title { font-size:1.05rem; font-weight:700; color:#1e3a5f;
-        border-bottom:2px solid #dde3ea; padding-bottom:.4rem; margin:1.5rem 0 .9rem; }
+    .section-title {
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--ink);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: .4rem;
+        margin: 1.5rem 0 .9rem;
+    }
 
-    /* ── Sidebar — light academic grey ── */
-    section[data-testid="stSidebar"] { background-color: #eef2f7 !important; }
-    section[data-testid="stSidebar"] * { color: #1e293b !important; }
-    section[data-testid="stSidebar"] .stMarkdown a { color:#2563eb !important; }
+    /* ── Tabs ── */
+    div[data-testid="stTabs"] button {
+        font-weight: 600;
+        color: var(--ink2);
+        border-radius: 6px 6px 0 0;
+    }
+    div[data-testid="stTabs"] button[aria-selected="true"] {
+        color: var(--primary);
+        background: #eff6ff;
+        font-weight: 700;
+    }
+
+    /* ── File uploader ── */
+    div[data-testid="stFileUploader"] {
+        background: var(--surface);
+        border: 2px dashed #c4d4e4;
+        border-radius: 10px;
+        padding: .8rem;
+    }
+    div[data-testid="stFileUploader"]:hover { border-color: var(--primary); }
+
+    /* ── Buttons ── */
+    .stButton > button {
+        border-radius: 7px;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--ink);
+    }
+    .stButton > button[kind="primary"] {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #ffffff;
+        font-weight: 700;
+    }
+    .stButton > button[kind="primary"]:hover { background: var(--primary-h); }
+    .stDownloadButton > button {
+        border-radius: 7px;
+        font-weight: 600;
+        background: var(--surface);
+        border: 1px solid var(--primary);
+        color: var(--primary);
+    }
+
+    /* ── Expanders ── */
+    div[data-testid="stExpander"] {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+
+    /* ── Data table ── */
+    div[data-testid="stDataFrame"] {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    section[data-testid="stSidebar"] {
+        background: #1e3a5f !important;
+        border-right: 1px solid #162d4a;
+    }
+    section[data-testid="stSidebar"] * { color: #e2eaf4 !important; }
+    section[data-testid="stSidebar"] .stMarkdown a { color: #93c5fd !important; }
+    section[data-testid="stSidebar"] hr { border-color: #2d4f73 !important; }
+    section[data-testid="stSidebar"] .stCheckbox label { font-size: .9rem !important; }
+    .sidebar-badge {
+        display: inline-block;
+        background: rgba(255,255,255,.12);
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: 5px;
+        padding: .15rem .55rem;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        color: #bde0ff;
+        margin-bottom: .6rem;
+    }
+    .sidebar-metric {
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 7px;
+        padding: .55rem .8rem;
+        margin-bottom: .4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .sidebar-metric .sm-label { font-size: .78rem; color: #93b4d4; }
+    .sidebar-metric .sm-val   { font-size: .88rem; font-weight: 700; color: #e8f2ff; }
 
     /* ── Disclaimer ── */
-    .disclaimer { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px;
-        padding:1rem 1.2rem; font-size:.85rem; color:#1e40af; margin-top:1.5rem; }
-    </style>
-    """, unsafe_allow_html=True)
-    st.markdown("""
-    <style>
-    :root {
-        --ink: #eef6ff;
-        --muted: #a9b7c9;
-        --line: #263548;
-        --surface: #111c2d;
-        --surface-soft: #16243a;
-        --blue: #60a5fa;
-        --teal: #2dd4bf;
-        --green: #34d399;
-        --amber: #fbbf24;
-        --red: #f87171;
-    }
-
-    .stApp {
-        background:
-            radial-gradient(circle at top left, rgba(45,212,191,.18), transparent 340px),
-            linear-gradient(180deg, #07111f 0%, #0b1423 46%, #101827 100%);
-        color: var(--ink);
-    }
-    .block-container {
-        max-width: 1180px;
-        padding-top: 1.25rem;
-        padding-bottom: 2.4rem;
-    }
-    h1, h2, h3, h4, h5, h6, p, li, label, span {
-        color: inherit;
-        letter-spacing: 0;
-    }
-
-    .main-header {
-        background:
-            linear-gradient(135deg, rgba(17,28,45,.98), rgba(15,40,60,.94));
-        border: 1px solid rgba(96,165,250,.18);
-        border-left: 6px solid var(--teal);
-        border-radius: 10px;
-        padding: 1.55rem 1.8rem;
-        margin-bottom: 1.15rem;
-        box-shadow: 0 18px 44px rgba(0,0,0,.28);
-    }
-    .main-header h1 {
-        color: #f8fbff;
-        font-size: 1.95rem;
-        line-height: 1.15;
-        margin: 0 0 .45rem 0;
-        font-weight: 800;
-    }
-    .main-header p {
-        color: var(--muted);
-        font-size: .98rem;
-        margin: 0;
-        max-width: 820px;
-    }
-
-    div[data-testid="stTabs"] button {
-        border-radius: 8px 8px 0 0;
-        color: var(--muted);
-        font-weight: 650;
-    }
-    div[data-testid="stTabs"] button[aria-selected="true"] {
-        color: var(--teal);
-        background: rgba(45,212,191,.11);
-    }
-
-    div[data-testid="stFileUploader"] {
-        background: var(--surface);
-        border: 1px dashed #3b5876;
-        border-radius: 10px;
-        padding: .9rem;
-        box-shadow: 0 10px 28px rgba(0,0,0,.22);
-    }
-    div[data-testid="stFileUploader"] section {
-        background: #0d1a2b;
-        border-color: #2a4058;
-    }
-
-    .metric-card {
-        background: linear-gradient(180deg, #142238, #101b2d);
-        border-radius: 8px;
-        padding: 1rem 1.15rem;
-        border: 1px solid #263548;
-        border-top: 4px solid var(--teal);
-        box-shadow: 0 12px 30px rgba(0,0,0,.22);
-        min-height: 104px;
-    }
-    .metric-card .label {
-        font-size: .72rem;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        margin-bottom: .38rem;
-        font-weight: 700;
-    }
-    .metric-card .value {
-        font-size: 1.55rem;
-        font-weight: 800;
-        color: #f8fbff;
-    }
-
-    .risk-banner {
-        border-radius: 10px;
-        padding: 1.35rem 1.65rem;
-        margin: 1rem 0;
-        text-align: left;
-        box-shadow: 0 14px 34px rgba(0,0,0,.24);
-    }
-    .risk-high {
-        background:#2a1218;
-        border:1px solid rgba(248,113,113,.32);
-        border-left:6px solid var(--red);
-    }
-    .risk-moderate {
-        background:#2a2110;
-        border:1px solid rgba(251,191,36,.30);
-        border-left:6px solid var(--amber);
-    }
-    .risk-low {
-        background:#10251d;
-        border:1px solid rgba(52,211,153,.30);
-        border-left:6px solid var(--green);
-    }
-    .risk-banner .risk-label { font-size:1.42rem; font-weight:850; }
-    .risk-high .risk-label { color:var(--red); }
-    .risk-moderate .risk-label { color:var(--amber); }
-    .risk-low .risk-label { color:var(--green); }
-    .risk-banner .risk-msg { color:#d7e1ee; }
-
-    .score-bar-wrap {
-        background:#1e2b3d;
-        border-radius:999px;
-        height:12px;
-        margin:.55rem 0 .2rem;
-        overflow:hidden;
-        border: 1px solid rgba(148,163,184,.22);
-    }
-    .score-bar-fill {
-        height:100%;
-        border-radius:999px;
-        transition: width .25s ease;
-    }
-
-    .section-title {
-        font-size: 1.02rem;
-        font-weight: 800;
-        color: #f8fbff;
-        border-bottom: 1px solid var(--line);
-        padding-bottom: .45rem;
-        margin: 1.35rem 0 .9rem;
-    }
-
-    section[data-testid="stSidebar"] {
-        background:
-            linear-gradient(180deg, #0a1321 0%, #101c2f 100%) !important;
-        border-right: 1px solid #253348;
-    }
-    section[data-testid="stSidebar"] * { color: #d8e3f1 !important; }
-    section[data-testid="stSidebar"] .stMarkdown a { color: var(--blue) !important; }
-    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-        font-size: .92rem;
-    }
-
-    .stButton > button, .stDownloadButton > button {
-        border-radius: 8px;
-        font-weight: 750;
-        border: 1px solid rgba(96,165,250,.20);
-        box-shadow: 0 10px 24px rgba(0,0,0,.24);
-    }
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #2563eb, var(--teal));
-        border: 0;
-        color: white;
-    }
-    div[data-testid="stExpander"] {
-        background: var(--surface);
-        border: 1px solid #263548;
-        border-radius: 8px;
-        box-shadow: 0 10px 24px rgba(0,0,0,.18);
-    }
-    div[data-testid="stDataFrame"] {
-        border: 1px solid #263548;
-        border-radius: 8px;
-        overflow: hidden;
-    }
     .disclaimer {
-        background:#0f2238;
-        border:1px solid #25496d;
-        border-left: 5px solid var(--blue);
-        border-radius:8px;
-        padding:1rem 1.15rem;
-        font-size:.85rem;
-        color:#dbeafe;
-        margin-top:1.5rem;
-    }
-
-    @media (max-width: 760px) {
-        .block-container { padding-left: 1rem; padding-right: 1rem; }
-        .main-header { padding: 1.2rem; }
-        .main-header h1 { font-size: 1.55rem; }
-        .metric-card { min-height: auto; }
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    st.markdown("""
-    <style>
-    :root {
-        --ink: #172033;
-        --muted: #5b677a;
-        --line: #d9e1ea;
-        --surface: #ffffff;
-        --blue: #2563eb;
-        --teal: #0f9f8f;
-        --green: #16a34a;
-        --amber: #d97706;
-        --red: #dc2626;
-    }
-
-    .stApp {
-        background:
-            linear-gradient(180deg, #eef6ff 0%, #f8fbfd 250px, #f6f8fb 100%);
-        color: var(--ink);
-    }
-    .block-container {
-        max-width: 1180px;
-        padding-top: 1.25rem;
-        padding-bottom: 2.4rem;
-    }
-    h1, h2, h3, h4, h5, h6, p, li, label, span {
-        letter-spacing: 0;
-    }
-
-    .main-header {
-        background:
-            linear-gradient(135deg, rgba(255,255,255,.98), rgba(244,250,255,.98));
-        border: 1px solid rgba(37, 99, 235, .14);
-        border-left: 6px solid var(--blue);
-        border-radius: 10px;
-        padding: 1.55rem 1.8rem;
-        margin-bottom: 1.15rem;
-        box-shadow: 0 14px 36px rgba(29, 78, 216, .10);
-    }
-    .main-header h1 {
-        color: var(--ink);
-        font-size: 1.95rem;
-        line-height: 1.15;
-        margin: 0 0 .45rem 0;
-        font-weight: 800;
-    }
-    .main-header p {
-        color: var(--muted);
-        font-size: .98rem;
-        margin: 0;
-        max-width: 820px;
-    }
-
-    div[data-testid="stTabs"] button {
-        border-radius: 8px 8px 0 0;
-        color: var(--muted);
-        font-weight: 650;
-    }
-    div[data-testid="stTabs"] button[aria-selected="true"] {
-        color: var(--blue);
-        background: rgba(37,99,235,.07);
-    }
-
-    div[data-testid="stFileUploader"] {
-        background: var(--surface);
-        border: 1px dashed #a8bfdc;
-        border-radius: 10px;
-        padding: .9rem;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, .04);
-    }
-    div[data-testid="stFileUploader"] section {
-        background: #f8fbff;
-        border-color: #d7e5f5;
-    }
-
-    .metric-card {
-        background: var(--surface);
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid var(--primary);
         border-radius: 8px;
-        padding: 1rem 1.15rem;
-        border: 1px solid #e3eaf2;
-        border-top: 4px solid var(--blue);
-        box-shadow: 0 8px 24px rgba(15, 23, 42, .055);
-        min-height: 104px;
-    }
-    .metric-card .label {
-        font-size: .72rem;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        margin-bottom: .38rem;
-        font-weight: 700;
-    }
-    .metric-card .value {
-        font-size: 1.55rem;
-        font-weight: 800;
-        color: var(--ink);
+        padding: .9rem 1.1rem;
+        font-size: .82rem;
+        color: #1e40af;
+        margin-top: 1.5rem;
+        line-height: 1.55;
     }
 
-    .risk-banner {
-        border-radius: 10px;
-        padding: 1.35rem 1.65rem;
-        margin: 1rem 0;
-        text-align: left;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, .06);
-    }
-    .risk-high {
-        background:#fff7f7;
-        border:1px solid #fecaca;
-        border-left:6px solid var(--red);
-    }
-    .risk-moderate {
-        background:#fffbeb;
-        border:1px solid #fde68a;
-        border-left:6px solid var(--amber);
-    }
-    .risk-low {
-        background:#f0fdf6;
-        border:1px solid #bbf7d0;
-        border-left:6px solid var(--green);
-    }
-    .risk-banner .risk-label { font-size:1.42rem; font-weight:850; }
-    .risk-high .risk-label { color:var(--red); }
-    .risk-moderate .risk-label { color:var(--amber); }
-    .risk-low .risk-label { color:var(--green); }
+    /* ── Info / success / warning overrides ── */
+    div[data-testid="stAlert"] { border-radius: 8px !important; }
 
-    .score-bar-wrap {
-        background:#e5edf5;
-        border-radius:999px;
-        height:12px;
-        margin:.55rem 0 .2rem;
-        overflow:hidden;
-        border: 1px solid rgba(148,163,184,.35);
-    }
-    .score-bar-fill {
-        height:100%;
-        border-radius:999px;
-        transition: width .25s ease;
-    }
-
-    .section-title {
-        font-size: 1.02rem;
-        font-weight: 800;
-        color: var(--ink);
-        border-bottom: 1px solid var(--line);
-        padding-bottom: .45rem;
-        margin: 1.35rem 0 .9rem;
-    }
-
-    section[data-testid="stSidebar"] {
-        background:
-            linear-gradient(180deg, #f8fbff 0%, #eef4f8 100%) !important;
-        border-right: 1px solid #dbe6ef;
-    }
-    section[data-testid="stSidebar"] * { color: #1e293b !important; }
-    section[data-testid="stSidebar"] .stMarkdown a { color: var(--blue) !important; }
-    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-        font-size: .92rem;
-    }
-
-    .stButton > button, .stDownloadButton > button {
-        border-radius: 8px;
-        font-weight: 750;
-        border: 1px solid rgba(37, 99, 235, .2);
-        box-shadow: 0 8px 18px rgba(37, 99, 235, .12);
-    }
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, var(--blue), var(--teal));
-        border: 0;
-    }
-    div[data-testid="stExpander"] {
-        background: var(--surface);
-        border: 1px solid #e3eaf2;
-        border-radius: 8px;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, .035);
-    }
-    div[data-testid="stDataFrame"] {
-        border: 1px solid #e3eaf2;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .disclaimer {
-        background:#eff6ff;
-        border:1px solid #bfdbfe;
-        border-left: 5px solid var(--blue);
-        border-radius:8px;
-        padding:1rem 1.15rem;
-        font-size:.85rem;
-        color:#1e40af;
-        margin-top:1.5rem;
-    }
-
-    @media (max-width: 760px) {
-        .block-container { padding-left: 1rem; padding-right: 1rem; }
-        .main-header { padding: 1.2rem; }
-        .main-header h1 { font-size: 1.55rem; }
+    /* ── Mobile ── */
+    @media (max-width: 720px) {
+        .block-container { padding-left: .8rem; padding-right: .8rem; }
+        .main-header { flex-direction: column; align-items: flex-start; gap: .6rem; }
+        .main-header .hdr-badge { margin-left: 0; }
+        .main-header .hdr-text h1 { font-size: 1.4rem; }
         .metric-card { min-height: auto; }
     }
     </style>
@@ -554,7 +342,7 @@ def classify_risk(score: float) -> Tuple[str, str, str]:
 
 def _score_bar(score: float, level: str) -> str:
     pct = int(score * 100)
-    col = {"high": "#ef4444", "moderate": "#f59e0b", "low": "#22c55e"}.get(level, "#6b7280")
+    col = {"high": "#b91c1c", "moderate": "#b45309", "low": "#059669"}.get(level, "#64748b")
     return (f'<div class="score-bar-wrap">'
             f'<div class="score-bar-fill" style="width:{pct}%;background:{col};"></div></div>'
             f'<div style="font-size:.8rem;color:#6b7280;text-align:right;">{pct}%</div>')
@@ -1030,39 +818,64 @@ def main() -> None:
     # Header
     st.markdown(
         '<div class="main-header">'
-        "<h1>🧠 AI-Based Dyslexia Screening</h1>"
-        "<p>Upload a handwriting sample for instant AI-powered dyslexia risk assessment — "
-        "combining vision analysis, OCR, letter reversal detection, and writing regularity.</p>"
-        "</div>",
+        '<div class="hdr-icon">🧠</div>'
+        '<div class="hdr-text">'
+        '<h1>Dyslexia Early Screening System</h1>'
+        '<p>AI-powered handwriting analysis combining deep learning, OCR, letter reversal '
+        'detection, and writing regularity — for early identification support only.</p>'
+        '</div>'
+        '<div class="hdr-badge">Screening Tool · Not a Diagnosis</div>'
+        '</div>',
         unsafe_allow_html=True,
     )
 
     # Sidebar
     with st.sidebar:
-        st.markdown("## About")
-        st.markdown("Fine-tuned **ResNet-50** trained on **128,902** handwriting images.")
+        st.markdown('<div class="sidebar-badge">AI Screening System</div>', unsafe_allow_html=True)
+        st.markdown("### Model Info")
+        st.markdown(
+            '<div class="sidebar-metric"><span class="sm-label">Architecture</span>'
+            '<span class="sm-val">ResNet-50</span></div>'
+            '<div class="sidebar-metric"><span class="sm-label">Training images</span>'
+            '<span class="sm-val">128,902</span></div>'
+            '<div class="sidebar-metric"><span class="sm-label">Test accuracy</span>'
+            '<span class="sm-val">77.0 %</span></div>'
+            '<div class="sidebar-metric"><span class="sm-label">ROC-AUC</span>'
+            '<span class="sm-val">86.0 %</span></div>'
+            '<div class="sidebar-metric"><span class="sm-label">Dyslexic F1</span>'
+            '<span class="sm-val">79.3 %</span></div>'
+            f'<div class="sidebar-metric"><span class="sm-label">Device</span>'
+            f'<span class="sm-val">{"GPU" if torch.cuda.is_available() else "CPU"}</span></div>',
+            unsafe_allow_html=True,
+        )
         st.markdown("---")
-        st.markdown("**Model performance**\n"
-                    "- Test accuracy : **75.9%**\n"
-                    "- ROC-AUC       : **84.9%**\n"
-                    "- Dyslexic recall: **79.9%**\n"
-                    f"- Device        : {'GPU' if torch.cuda.is_available() else 'CPU'}")
-        st.markdown("---")
-        st.markdown("**Settings**")
-        enable_gradcam = st.checkbox("Enable Grad-CAM", value=False,
-                                     help="Show attention heatmaps (+processing time)")
-        use_tta        = st.checkbox("Enable TTA", value=False,
-                                     help="Test-time augmentation — 5× passes, +1-2% accuracy")
+        st.markdown("### Analysis Settings")
+        enable_gradcam = st.checkbox("Enable Grad-CAM",
+                                     help="Show attention heatmaps — highlights regions the model "
+                                          "focuses on (adds ~2 s per image)")
+        use_tta        = st.checkbox("Enable TTA",
+                                     help="Test-Time Augmentation — averages 5 augmented passes "
+                                          "per patch for +1–2% accuracy")
         st.session_state.enable_gradcam = enable_gradcam
         st.session_state.use_tta        = use_tta
-
         if use_tta:
-            st.success("TTA enabled — averaging 5 augmented predictions per patch")
+            st.info("TTA active — 5× augmented predictions averaged per patch.")
         st.markdown("---")
-        st.markdown("**Upload guidelines**\n"
-                    "- Clear, well-lit scan\n"
-                    "- Full page preferred\n"
-                    f"- Max {MAX_FILE_MB} MB · PNG/JPG/JPEG")
+        st.markdown("### Upload Requirements")
+        st.markdown(
+            "- Clear, well-lit scan or photo\n"
+            "- Cursive or print handwriting\n"
+            "- Full page preferred\n"
+            f"- PNG · JPG · JPEG · max {MAX_FILE_MB} MB"
+        )
+        st.markdown("---")
+        st.markdown(
+            '<div style="font-size:.75rem;color:#7a9bbf;line-height:1.6;">'
+            'This tool is intended for <strong style="color:#aac8e8;">early screening '
+            'support only</strong>. Results must be interpreted by a qualified '
+            'educational psychologist or clinician.</div>',
+            unsafe_allow_html=True,
+        )
 
     # Load model
     if st.session_state.model is None:
@@ -1087,13 +900,20 @@ def main() -> None:
                            st.session_state.use_tta)
         else:
             st.markdown("""
-            <div style="text-align:center;padding:3rem 1rem;color:#64748b;">
-                <div style="font-size:3rem;">📄</div>
-                <div style="font-size:1rem;margin-top:.5rem;color:#334155;">
-                    Upload a handwriting image above to begin screening
+            <div style="background:#ffffff;border:1px solid #dce4ed;border-radius:10px;
+                        text-align:center;padding:2.8rem 1.5rem;margin-top:.5rem;">
+                <div style="font-size:2.8rem;margin-bottom:.6rem;">📋</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#0d1b2a;margin-bottom:.35rem;">
+                    Upload a handwriting sample to begin
                 </div>
-                <div style="font-size:.85rem;margin-top:.3rem;color:#64748b;">
-                    Supports full-page scans · PNG, JPG, JPEG · up to 10 MB
+                <div style="font-size:.85rem;color:#7a92a8;max-width:380px;margin:0 auto;
+                            line-height:1.6;">
+                    The system will extract patches, run the AI model, perform OCR,
+                    detect letter reversals, and produce a multimodal risk score.
+                </div>
+                <div style="margin-top:1rem;font-size:.78rem;color:#a0b4c8;">
+                    PNG · JPG · JPEG &nbsp;·&nbsp; up to 10 MB &nbsp;·&nbsp;
+                    Full page preferred
                 </div>
             </div>""", unsafe_allow_html=True)
 
@@ -1112,10 +932,10 @@ def main() -> None:
 
     # Footer
     st.markdown(
-        "<div style='text-align:center;color:#64748b;font-size:.8rem;margin-top:2rem;"
-        "border-top:1px solid #dde3ea;padding-top:1rem;'>"
-        "For educational and screening purposes only &nbsp;·&nbsp; "
-        f"Not a substitute for professional diagnosis &nbsp;·&nbsp; v{config.VERSION}"
+        "<div style='text-align:center;color:#9aafc4;font-size:.78rem;margin-top:2.5rem;"
+        "border-top:1px solid #dce4ed;padding-top:1rem;'>"
+        "For early screening support only &nbsp;·&nbsp; Not a substitute for professional "
+        f"clinical assessment &nbsp;·&nbsp; v{config.VERSION}"
         "</div>",
         unsafe_allow_html=True,
     )
