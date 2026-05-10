@@ -13,8 +13,8 @@ from huggingface_hub import HfApi
 
 IGNORE_PATTERNS = [
     ".git/*",
-    "__pycache__/*",
-    "*.pyc",
+    "**/__pycache__/*",
+    "**/*.pyc",
     ".env",
     ".env.*",
     "data/*",
@@ -31,6 +31,11 @@ IGNORE_PATTERNS = [
     "venv/*",
     "env/*",
     ".conda/*",
+    # Keep only the fine-tuned ResNet-50 — the app's default model
+    "models/resnet50_dyslexia_base.pth",
+    "models/efficientnet_dyslexia_base.pth",
+    "models/efficientnet_dyslexia_finetuned.pth",
+    "models/predictions_*.csv",
 ]
 
 
@@ -56,14 +61,15 @@ def main() -> None:
         private=args.private,
         exist_ok=True,
     )
+    print(f"Uploading to https://huggingface.co/spaces/{args.repo_id} …")
     api.upload_folder(
         repo_id=args.repo_id,
         repo_type="space",
         folder_path=".",
-        commit_message="Deploy dyslexia screening Streamlit app",
+        commit_message="Deploy: clinical UI redesign + corrected metrics",
         ignore_patterns=IGNORE_PATTERNS,
     )
-    print(f"https://huggingface.co/spaces/{args.repo_id}")
+    print(f"\nDone! Space URL: https://huggingface.co/spaces/{args.repo_id}")
 
 
 if __name__ == "__main__":
