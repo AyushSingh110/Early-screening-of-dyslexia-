@@ -1,142 +1,112 @@
----
-title: Dyslexia Early Screening System
-emoji: 🧠
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_port: 8501
-pinned: false
-license: mit
----
+<div align="center">
 
-# Early Screening of Dyslexia
+# Dyslexia Early Screening System
 
-An AI-powered multimodal system for early-stage dyslexia screening, combining deep learning-based handwriting analysis with linguistic feature engineering. Built for educators, parents, and clinical support professionals.
+**AI-powered multimodal handwriting analysis for early dyslexia detection**
 
-> **Disclaimer**: This tool is intended for early screening purposes only and does not constitute a medical diagnosis. Results should be interpreted by qualified professionals.
+[![Live Demo](https://img.shields.io/badge/🤗%20Hugging%20Face-Live%20Demo-blue)](https://huggingface.co/spaces/AImRs/dyslexia-early-screening-system)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
----
+> **Clinical Disclaimer** — This tool is intended for early screening purposes only and does not constitute a medical diagnosis. All results should be reviewed by a qualified professional.
 
-## Table of Contents
-
-- [Overview](#overview)
-- [System Architecture](#system-architecture)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Models](#models)
-- [Dataset](#dataset)
-- [Training](#training)
-- [Evaluation](#evaluation)
-- [Explainability](#explainability)
-- [Configuration](#configuration)
-- [Deployment](#deployment)
+</div>
 
 ---
 
 ## Overview
 
-Dyslexia is one of the most common learning disabilities, affecting reading, writing, and spelling abilities. Early identification is critical for timely intervention. This system automates the screening process by analyzing two complementary signals:
+Dyslexia affects an estimated 10–15% of the population, yet early identification remains largely manual and inaccessible. This system automates the screening process by analysing two complementary signals from a single handwriting image:
 
-1. **Handwriting patterns** — using a fine-tuned ResNet-50 convolutional neural network trained on 128,902 handwriting images to classify patches as dyslexic or typical.
-2. **Linguistic patterns** — using engineered linguistic features and GPT-2 perplexity to detect writing errors characteristic of dyslexia.
+| Modality | Method | Weight |
+|---|---|---|
+| **Vision** | Patch-based ResNet-50 classifier (fine-tuned on 208K images) | 60% |
+| **Language** | Spell-check + phonetic error detection + DistilGPT2 perplexity | 25% |
+| **Differential** | Cross-modal disagreement penalty | 15% |
 
-Both modalities are fused into a unified risk score through a weighted multimodal fusion strategy.
+Results are presented as a **LOW / MODERATE / HIGH** risk score with Grad-CAM visual explanations — no technical knowledge required to interpret.
+
+---
+
+## Key Results
+
+| Metric | Baseline | Fine-tuned |
+|---|---|---|
+| Accuracy | 68.9% | **77.0%** |
+| ROC-AUC | 75.7% | **86.0%** |
+| Dyslexic Precision | 80.3% | **96.6%** |
+| Dyslexic Recall | 69.5% | 67.2% |
+| Dyslexic F1 | 74.5% | **79.3%** |
+| Normal Recall | 67.6% | **95.5%** |
+
+Evaluated on **56,693 held-out test patches**. At the default threshold (0.5), the fine-tuned model achieves 96.6% precision on dyslexic patches — nearly eliminating false positives. Lowering the threshold to 0.35 recovers recall for higher-sensitivity screening.
 
 ---
 
 ## System Architecture
 
 ```
-                    ┌─────────────────────────────────┐
-                    │        Uploaded Image            │
-                    └────────────┬────────────────────┘
-                                 │
-              ┌──────────────────┴──────────────────┐
-              │                                     │
-   ┌──────────▼──────────┐              ┌───────────▼──────────┐
-   │   Patch Extraction   │              │    OCR (Tesseract)   │
-   │  (224×224 patches)   │              │    Text Extraction   │
-   └──────────┬──────────┘              └───────────┬──────────┘
-              │                                     │
-   ┌──────────▼──────────┐              ┌───────────▼──────────┐
-   │  ResNet-50 (Vision)  │              │  Linguistic Feature  │
-   │  Binary Classifier   │              │     Extraction       │
-   └──────────┬──────────┘              └───────────┬──────────┘
-              │                                     │
-   ┌──────────▼──────────┐              ┌───────────▼──────────┐
-   │  Handwriting Risk    │              │  Language Risk Score  │
-   │       Score          │              │  (Rule-based)        │
-   └──────────┬──────────┘              └───────────┬──────────┘
-              │                                     │
-              └──────────────┬──────────────────────┘
-                             │
-                  ┌──────────▼──────────┐
-                  │  Multimodal Fusion   │
-                  │  60% vision + 25%   │
-                  │  language + 15%     │
-                  │  differential       │
-                  └──────────┬──────────┘
-                             │
-                  ┌──────────▼──────────┐
-                  │   Risk Assessment    │
-                  │  LOW / MODERATE /   │
-                  │       HIGH          │
-                  └─────────────────────┘
+                   ┌──────────────────────┐
+                   │    Handwriting Image  │
+                   └──────────┬───────────┘
+                              │
+             ┌────────────────┴────────────────┐
+             │                                 │
+  ┌──────────▼──────────┐          ┌───────────▼──────────┐
+  │   Patch Extraction   │          │    Tesseract OCR      │
+  │   (224×224, stride)  │          │    Text Extraction    │
+  └──────────┬──────────┘          └───────────┬──────────┘
+             │                                 │
+  ┌──────────▼──────────┐          ┌───────────▼──────────┐
+  │  ResNet-50 Classifier│          │  Linguistic Features  │
+  │  P(dyslexic) per     │          │  + DistilGPT2        │
+  │  patch               │          │  Perplexity          │
+  └──────────┬──────────┘          └───────────┬──────────┘
+             │                                 │
+  ┌──────────▼──────────┐          ┌───────────▼──────────┐
+  │  Handwriting Risk    │          │  Language Risk Score  │
+  └──────────┬──────────┘          └───────────┬──────────┘
+             │                                 │
+             └──────────────┬──────────────────┘
+                            │
+                 ┌──────────▼──────────┐
+                 │  Multimodal Fusion   │
+                 │  60% · 25% · 15%    │
+                 └──────────┬──────────┘
+                            │
+                 ┌──────────▼──────────┐
+                 │   Risk Assessment    │
+                 │  LOW / MODERATE /   │
+                 │       HIGH          │
+                 └─────────────────────┘
 ```
 
 ---
 
 ## Features
 
-- **Patch-based inference** — Full handwriting pages are split into 224×224 patches and analyzed individually, enabling analysis of variable-size inputs.
-- **Two-stage transfer learning** — ResNet-50 pretrained on ImageNet; Stage 1 trains the classifier head (10 epochs), Stage 2 unfreezes the last residual block for fine-tuning (5 epochs).
-- **Linguistic analysis** — Detects spelling errors, non-words, phonetic confusions, and rare words using PyEnchant, Double Metaphone, and handcrafted NLP features.
-- **LLM-based perplexity** — Uses DistilGPT2 to measure text perplexity as a proxy for linguistic fluency.
-- **Grad-CAM explainability** — Visualizes model attention on handwriting patches so results are interpretable.
-- **Multimodal fusion** — Combines handwriting and language risks with weighted formula for a more robust prediction.
-- **Interactive web app** — Streamlit-based UI with a clean, card-style dashboard requiring no technical expertise to operate.
+- **Patch-based inference** — Variable-size handwriting pages are tiled into 224×224 patches and analysed independently, then aggregated into a page-level score.
+- **Two-stage transfer learning** — Stage 1 trains the classifier head; Stage 2 unfreezes ResNet-50's `layer4` for domain-specific fine-tuning.
+- **Linguistic analysis** — Non-word ratio, phonetic error ratio (Double Metaphone), rare-word ratio, and normalised DistilGPT2 perplexity combined via weighted sum.
+- **Grad-CAM explainability** — Gradient-weighted Class Activation Maps highlight which handwriting regions most influenced each prediction.
+- **Multimodal fusion** — Weighted combination of vision and language risk with a cross-modal differential penalty for robustness when signals disagree.
+- **Clinical web interface** — Streamlit app with a dark-sidebar EHR-style layout, risk banners, per-patch confidence distribution, and Grad-CAM overlays.
 
 ---
 
 ## Tech Stack
 
-### Deep Learning & Machine Learning
-| Library | Version | Purpose |
-|---|---|---|
-| PyTorch | ≥ 2.0.0 | Deep learning framework |
-| TorchVision | ≥ 0.15.0 | ResNet-50, image transforms |
-| Scikit-learn | ≥ 1.3.0 | Metrics, evaluation utilities |
-| HuggingFace Transformers | ≥ 4.35.0 | DistilGPT2 for text perplexity |
-
-### Computer Vision & Image Processing
-| Library | Purpose |
+| Category | Libraries |
 |---|---|
-| OpenCV (`cv2`) | Image manipulation, Grad-CAM heatmap overlay |
-| PIL / Pillow | Image loading and preprocessing |
-| pytesseract | Tesseract OCR wrapper for text extraction from images |
-
-### Natural Language Processing
-| Library | Purpose |
-|---|---|
-| PyEnchant (`enchant`) | English spell-checking dictionary (en_US) |
-| Metaphone | Double Metaphone phonetic similarity matching |
-
-### Data & Utilities
-| Library | Purpose |
-|---|---|
-| NumPy | Numerical computing and array operations |
-| Pandas | CSV dataset loading and manipulation |
-| Joblib | Model serialization |
-| python-dotenv | Environment variable management |
-| kaggle | Kaggle API for dataset download |
-
-### Web Application
-| Library | Purpose |
-|---|---|
-| Streamlit | Interactive web UI |
+| Deep Learning | PyTorch ≥ 2.0, TorchVision ≥ 0.15 |
+| Language Models | HuggingFace Transformers ≥ 4.35 (DistilGPT2) |
+| Computer Vision | OpenCV, Pillow |
+| OCR | pytesseract (Tesseract 5) |
+| NLP | PyEnchant, Metaphone |
+| ML Utilities | Scikit-learn, NumPy, Pandas |
+| Web App | Streamlit |
+| Deployment | Docker, Hugging Face Spaces |
 
 ---
 
@@ -146,27 +116,22 @@ Both modalities are fused into a unified risk score through a weighted multimoda
 Early-screening-of-dyslexia-/
 │
 ├── frontend/
-│   └── app.py                      # Streamlit web application (main entry point)
+│   └── app.py                       # Streamlit web application
 ├── backend/
-│   ├── config.py                   # Centralized configuration (hyperparameters, paths, thresholds)
-│   ├── train_vision.py             # Two-stage vision model training script
-│   ├── evaluate_models.py          # Side-by-side baseline vs fine-tuned evaluation
-│   ├── utils/                      # Vision/OCR/report/history utilities
-│   └── language_model/             # Linguistic analysis module
-├── requirements.txt                # Python dependencies
-├── requirements-deploy.txt         # Lean runtime dependencies for Docker deployment
-├── Dockerfile                      # Hugging Face Spaces Docker deployment
-├── DEPLOYMENT.md                   # Step-by-step deployment guide
-├── student_writing.csv             # Linguistic dataset (token-level error annotations)
-│
-├── models/                         # Saved model weights (not included in repo)
-│   ├── resnet50_dyslexia_base.pth       # Stage 1 baseline checkpoint
-│   └── resnet50_dyslexia_finetuned.pth  # Stage 2 fine-tuned checkpoint (used for inference)
-│
-└── data/                           # Dataset directory (not included in repo)
-    ├── train/dyslexic/ & normal/   # 128,902 training images
-    ├── val/dyslexic/ & normal/     # 22,747 validation images
-    └── test/dyslexic/ & normal/    # 56,693 test images
+│   ├── config.py                    # Centralised hyperparameters & paths
+│   ├── train_vision.py              # Two-stage training script
+│   ├── evaluate_models.py           # Baseline vs fine-tuned evaluation
+│   ├── utils/                       # Vision, OCR, report, history utilities
+│   └── language_model/              # Linguistic analysis module
+├── notebooks/
+│   ├── 01_dataset_analysis.ipynb    # Dataset EDA
+│   ├── 02_model_results.ipynb       # Evaluation plots & metrics
+│   └── 03_gradcam_visualization.ipynb
+├── scripts/
+│   └── deploy_to_hf_space.py        # Hugging Face Spaces deploy script
+├── Dockerfile
+├── requirements.txt
+└── requirements-deploy.txt          # Lean runtime deps for Docker
 ```
 
 ---
@@ -174,128 +139,89 @@ Early-screening-of-dyslexia-/
 ## Installation
 
 ### Prerequisites
+
 - Python 3.10+
-- CUDA-capable GPU (recommended: NVIDIA RTX 3050 4GB or higher)
 - [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) installed on the system
+
+| Platform | Install |
+|---|---|
+| Windows | [UB-Mannheim installer](https://github.com/UB-Mannheim/tesseract/wiki) |
+| Linux | `sudo apt-get install tesseract-ocr` |
+| macOS | `brew install tesseract` |
 
 ### Setup
 
 ```bash
-# 1. Clone the repository
-git clone <repository-url>
+git clone https://github.com/AyushSingh110/Early-screening-of-dyslexia-.git
 cd Early-screening-of-dyslexia-
 
-# 2. Create and activate a virtual environment
 conda create -n dyslexia_env python=3.10
 conda activate dyslexia_env
 
-# 3. Install dependencies
 pip install -r requirements.txt
 ```
 
-### Tesseract OCR Installation
+### Run the App
 
-| Platform | Command |
-|---|---|
-| Windows | Download from [UB-Mannheim Tesseract](https://github.com/UB-Mannheim/tesseract/wiki) |
-| Linux | `sudo apt-get install tesseract-ocr` |
-| macOS | `brew install tesseract` |
+```bash
+streamlit run frontend/app.py
+# → http://localhost:8501
+```
 
 ---
 
 ## Usage
 
-### Running the Web Application
-
-```bash
-streamlit run frontend/app.py
-```
-
-Opens at `http://localhost:8501` in your browser.
-
-**Workflow:**
-1. Upload a handwriting image (PNG, JPG, JPEG — max 10 MB)
-2. Toggle Grad-CAM visualization from the sidebar (optional)
+1. Upload a handwriting image (PNG / JPG / JPEG, max 10 MB)
+2. Optionally enable **Grad-CAM** from the sidebar
 3. Click **Analyse Handwriting**
-4. View:
-   - Overall risk level (LOW / MODERATE / HIGH) with color-coded banner
-   - Handwriting risk, language risk, and final fused score
-   - Per-patch predictions and confidence distribution
-   - Grad-CAM heatmaps highlighting model attention regions
-
-### Training
-
-```bash
-# Train both baseline and fine-tuned checkpoints:
-python -m backend.train_vision
-
-# Evaluate both models side-by-side on the test set:
-python -m backend.evaluate_models
-```
+4. Review the risk report — overall level, per-modality scores, patch confidence chart, and heatmaps
 
 ---
 
 ## Models
 
-### Vision Model — ResNet-50
+### Vision — ResNet-50
 
-**Architecture:**
 ```
-Input: (B, 3, 224, 224)
-  ↓
-ResNet-50 Backbone (ImageNet pretrained)
-  ↓
-Adaptive Average Pooling → 2048-dim feature vector
-  ↓
-FC(2048 → 256) + ReLU + Dropout(0.5)
-  ↓
-FC(256 → 1) + Sigmoid
-  ↓
-Output: Dyslexia probability ∈ [0, 1]
+Input (B, 3, 224, 224)
+  → ResNet-50 backbone (ImageNet pretrained)
+  → Adaptive Average Pool → 2048-d vector
+  → FC(2048→256) + ReLU + Dropout(0.5)
+  → FC(256→1) + Sigmoid
+  → P(dyslexic) ∈ [0, 1]
 ```
 
-**Transfer Learning Strategy:**
+| Stage | Epochs | LR | Unfrozen |
+|---|---|---|---|
+| 1 — Baseline | 10 | 1e-3 | Head only |
+| 2 — Fine-tune | 5 | 1e-5 | `layer4` + head |
 
-| Stage | Epochs | Learning Rate | Unfrozen Layers | Saved As |
-|---|---|---|---|---|
-| 1 — Baseline  | 10 | 1e-3 | Classifier head only | `resnet50_dyslexia_base.pth` |
-| 2 — Fine-tune | 5  | 1e-5 | ResNet `layer4` + head | `resnet50_dyslexia_finetuned.pth` |
+Optimiser: Adam (weight decay 0.01) · Loss: BCELoss · LR schedule: StepLR (step=3, γ=0.5)
 
-- **Loss**: Binary Cross-Entropy (BCELoss)
-- **Optimizer**: Adam with weight decay 0.01
-- **LR schedule**: StepLR (step=3, γ=0.5) during baseline stage
-- **Normalization**: ImageNet mean/std `[0.485, 0.456, 0.406]` / `[0.229, 0.224, 0.225]`
+### Language Risk
 
-### Language Risk Model
-
-**Pipeline:**
 ```
-Raw OCR Text
-  ↓
-Tokenization → word list
-  ↓
-PyEnchant spell-check  →  non_word_ratio        (weight 0.40)
-Metaphone matching     →  phonetic_error_ratio  (weight 0.25)
-Rare-word detection    →  rare_word_ratio       (weight 0.10)
-DistilGPT2             →  perplexity (normalised)(weight 0.25)
-  ↓
-Weighted sum → language risk ∈ [0, 1]
+non_word_ratio       × 0.40   (PyEnchant spell-check)
+phonetic_error_ratio × 0.25   (Double Metaphone)
+rare_word_ratio      × 0.10
+perplexity_norm      × 0.25   (DistilGPT2)
+─────────────────────────────
+language_risk ∈ [0, 1]
 ```
 
 ### Multimodal Fusion
 
 ```
-final_risk = 0.60 × handwriting_risk
+final_risk = 0.60 × vision_risk
            + 0.25 × language_risk
-           + 0.15 × max(language_risk − handwriting_risk, 0)
+           + 0.15 × max(language_risk − vision_risk, 0)
 ```
 
-- If OCR extracts fewer than 20 words: language component is skipped.
-- Safety cap: if `handwriting_risk < 0.2`, `final_risk` is capped at 0.45.
+- Language component skipped if OCR yields < 20 words.
+- If `vision_risk < 0.2`, `final_risk` is capped at 0.45.
 
-**Risk Thresholds:**
-
-| Level | Score Range |
+| Risk Level | Score |
 |---|---|
 | LOW | < 0.30 |
 | MODERATE | 0.30 – 0.50 |
@@ -305,125 +231,46 @@ final_risk = 0.60 × handwriting_risk
 
 ## Dataset
 
-- **Source**: [Dr. Iza Sazanita Isa — Dyslexia Handwriting Dataset (Kaggle)](https://www.kaggle.com/datasets/drizasazanitaisa/dyslexia-handwriting-dataset)
-- **Original classes**: Normal · Reversal · Corrected
-- **Binary mapping**: Reversal + Corrected → `dyslexic`, Normal → `normal`
-- **Total images**: 208,342
+**Source:** [Dyslexia Handwriting Dataset — Dr. Iza Sazanita Isa (Kaggle)](https://www.kaggle.com/datasets/drizasazanitaisa/dyslexia-handwriting-dataset)
 
-| Split | Images | Classes |
-|---|---|---|
-| Train | 128,902 | dyslexic / normal |
-| Val   | 22,747  | dyslexic / normal |
-| Test  | 56,693  | dyslexic / normal |
+Binary mapping: `Reversal + Corrected → dyslexic`, `Normal → normal`
 
-**Data augmentation (training only):**
-- Random rotation ±10°
-- Random horizontal flip 50%
-- Color jitter (brightness/contrast ±0.2)
-- Resize to 224×224 + ImageNet normalization
+| Split | Images |
+|---|---|
+| Train | 128,902 |
+| Val | 22,747 |
+| Test | 56,693 |
+| **Total** | **208,342** |
+
+Training augmentation: random rotation ±10°, horizontal flip 50%, colour jitter, ImageNet normalisation.
 
 ---
 
 ## Training
 
 ```bash
+# Train both stages sequentially
 python -m backend.train_vision
-```
 
-Runs automatically in two stages and saves both checkpoints to `models/`.
-
-**Expected training time** (NVIDIA RTX 3050 4GB):
-- Stage 1 (10 epochs × ~4,000 batches): ~5–6 hours
-- Stage 2 (5 epochs fine-tuning): ~2.5–3 hours
-
----
-
-## Evaluation
-
-```bash
+# Evaluate on test set
 python -m backend.evaluate_models
 ```
 
-Results on **56,693 test patches** (label 0 = dyslexic, label 1 = normal — ImageFolder alphabetical):
-
-| Metric | Baseline | Fine-tuned | Winner |
-|---|---|---|---|
-| Accuracy | 68.9% | **77.0%** | Fine-tuned |
-| ROC-AUC | 75.7% | **86.0%** | Fine-tuned |
-| Dyslexic Precision | 80.3% | **96.6%** | Fine-tuned |
-| Dyslexic Recall | **69.5%** | 67.2% | Baseline |
-| Dyslexic F1 | 74.5% | **79.3%** | Fine-tuned ✓ |
-| Normal Recall | 67.6% | **95.5%** | Fine-tuned |
-
-> **Note**: The fine-tuned model has very high dyslexic precision (96.6%) — when it flags a patch as dyslexic it is almost always correct. Dyslexic recall (67.2%) means ~33% of dyslexic patches are missed at threshold 0.5; lowering the threshold trades precision for recall. For screening, a lower threshold (e.g. 0.35) is recommended to reduce missed cases.
-
----
-
-## Explainability
-
-### Grad-CAM (Gradient-weighted Class Activation Mapping)
-
-Grad-CAM produces visual explanations by:
-1. Registering forward and backward hooks on ResNet-50's `layer4`
-2. Computing gradients of the predicted class score w.r.t. feature maps
-3. Weighting feature maps by global-average-pooled gradients
-4. Applying ReLU and upsampling to image resolution
-5. Overlaying a JET colormap heatmap on the original patch
-
-**Colormap interpretation:**
-- **Red/Yellow**: High model attention (features most influential to prediction)
-- **Blue**: Low model attention
-
-Enable from the sidebar in the Streamlit app.
-
----
-
-## Configuration
-
-All hyperparameters are centralized in [backend/config.py](backend/config.py):
-
-```python
-IMAGE_SIZE          = 224       # Input patch size
-BATCH_SIZE          = 32
-LEARNING_RATE       = 0.001     # Stage 1 LR
-EPOCHS              = 10        # Stage 1 epochs
-WEIGHT_DECAY        = 0.01
-
-DYSLEXIA_THRESHOLD  = 0.5
-HIGH_RISK_THRESHOLD = 0.5
-MODERATE_RISK_THRESHOLD = 0.3
-
-PATCH_SIZE          = 224
-PATCH_STRIDE        = 224       # No overlap
-PATCH_MIN_VARIANCE  = 100.0     # Filters blank/white patches
-NUM_WORKERS         = 0         # Windows compatibility
-```
+Expected time on RTX 3050 4 GB: Stage 1 ~5–6 h, Stage 2 ~2.5–3 h.
 
 ---
 
 ## Deployment
 
-### Recommended: Hugging Face Spaces Docker
+The app is deployed live on Hugging Face Spaces (Docker):
 
-1. Create a new Space at [huggingface.co/spaces](https://huggingface.co/spaces) and choose **Docker**.
-2. Push this repository to the Space.
-3. Upload `models/resnet50_dyslexia_finetuned.pth` with Git LFS.
-4. The app runs from `frontend/app.py` on port `8501`.
+**[https://huggingface.co/spaces/AImRs/dyslexia-early-screening-system](https://huggingface.co/spaces/AImRs/dyslexia-early-screening-system)**
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for exact commands.
+To redeploy after changes:
 
-### Alternative: Streamlit Community Cloud
-
-1. Push this repository to GitHub (add model files via Git LFS or host on HuggingFace Hub)
-2. Visit [share.streamlit.io](https://share.streamlit.io)
-3. Connect your GitHub repo and select `frontend/app.py` as the entry point
-4. Add any secrets (e.g. Kaggle credentials) in the Secrets panel
-
-### Older Hugging Face Spaces Notes
-
-1. Create a new Space at [huggingface.co/spaces](https://huggingface.co/spaces)
-2. Push the repo — HuggingFace supports large model files natively
-3. The app runs at `https://huggingface.co/spaces/<username>/<space-name>`
+```bash
+python scripts/deploy_to_hf_space.py
+```
 
 ---
 
@@ -431,7 +278,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for exact commands.
 
 | Component | Minimum | Recommended |
 |---|---|---|
-| GPU | None (CPU inference) | NVIDIA RTX 3050 4GB+ |
+| GPU | None (CPU inference) | NVIDIA RTX 3050 4 GB+ |
 | CUDA | — | 11.8+ |
 | RAM | 8 GB | 16 GB |
 | Storage | 2 GB | 10 GB (with dataset) |
@@ -440,6 +287,4 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for exact commands.
 
 ## License
 
-Apache 2.0
-
----
+MIT
